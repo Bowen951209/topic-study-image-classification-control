@@ -18,7 +18,7 @@ import java.util.List;
 public class ObjectClassifier extends JFrame {
     private static final String IMG_SRC = "resources/pictures/kids.jpg";
     private static final String MODEL_CFG_SRC = "resources/yolo/yolov3-320.cfg";
-    private static final String MODEL_WEIGHTS_SRC = "resources/yolo/yolov3-320.weights";
+    private static final String MODEL_WEIGHTS_SRC = "resources/externalFiles/yolov3.weights";
 
     private ObjectClassifier() {
         // Prepare fot image
