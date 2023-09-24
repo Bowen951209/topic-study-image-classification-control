@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 public class FaceClassifier extends JFrame {
-    private static final String IMG_SRC = "resources/MeAndSister.JPG";
+    private static final String IMG_SRC = "resources/pictures/MeAndSister.JPG";
 
     private FaceClassifier(int width, int height, BufferedImage img) {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -28,7 +28,7 @@ public class FaceClassifier extends JFrame {
     public static void main(String[] args) {
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        CascadeClassifier faceDetector = new CascadeClassifier("resources/lbpcascade_frontalface.xml");
+        CascadeClassifier faceDetector = new CascadeClassifier("resources/haarcascades/lbpcascade_frontalface.xml");
 
         // Import image.
         Mat img = Imgcodecs.imread(IMG_SRC);
