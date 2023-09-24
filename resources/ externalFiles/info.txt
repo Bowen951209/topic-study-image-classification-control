@@ -1,2 +1,0 @@
-This folder contains large files included in the programs. 
-Because GitHub wouldn't let me upload large files, users have to download the files themselves into this folder.
