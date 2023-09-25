@@ -10,15 +10,20 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class ObjectClassifier extends JFrame {
     private static final String IMG_SRC = "resources/pictures/kids.jpg";
     private static final String MODEL_CFG_SRC = "resources/yolo/yolov3-320.cfg";
     private static final String MODEL_WEIGHTS_SRC = "resources/externalFiles/yolov3.weights";
+    private static final String LABEL_NAME_LIST_SRC = "resources/yolo/coco.names";
+    private static List<String> labelList;
 
     private ObjectClassifier() {
         // Prepare fot image
@@ -112,9 +117,10 @@ public class ObjectClassifier extends JFrame {
             Imgproc.rectangle(img, rect, new Scalar(0, 255, 0));
 
             // draw texts
-            Imgproc.putText(img, labelIDList.get(idx) + " " + confidenceList.get(idx),
-                    new Point(rect.x, rect.y), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0,
-                            0), 2);
+            String labelName = getLabelList().get(labelIDList.get(idx));
+            Imgproc.putText(img, labelName + " " + toPercentage(confidenceList.get(idx)),
+                    new Point(rect.x, rect.y), Imgproc.FONT_HERSHEY_SIMPLEX, .5, new Scalar(0,
+                            255, 0), 1);
         }
     }
 
@@ -132,6 +138,28 @@ public class ObjectClassifier extends JFrame {
         }
 
         return maxIndex;
+    }
+
+    private static List<String> getLabelList() {
+        if (labelList == null) {
+            labelList = new ArrayList<>();
+            File file = new File(LABEL_NAME_LIST_SRC);
+            try {
+                Scanner scanner = new Scanner(file);
+                while (scanner.hasNextLine()) {
+                    labelList.add(scanner.nextLine());
+                }
+                scanner.close();
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return labelList;
+    }
+
+    private static String toPercentage(float v) {
+        return (int)(v * 100) + "%";
     }
 
     public static void main(String[] args) {
