@@ -135,6 +135,7 @@ public class ObjectClassifier extends JFrame {
     }
 
     public static void main(String[] args) {
+        // TODO: 2023/9/25 auto download weights file if not exist in local
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
