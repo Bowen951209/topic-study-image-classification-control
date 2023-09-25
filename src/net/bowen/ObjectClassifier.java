@@ -9,14 +9,10 @@ import org.opencv.imgproc.Imgproc;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class ObjectClassifier extends JFrame {
     private static final String IMG_SRC = "resources/pictures/kids.jpg";
@@ -145,12 +141,11 @@ public class ObjectClassifier extends JFrame {
             labelList = new ArrayList<>();
             File file = new File(LABEL_NAME_LIST_SRC);
             try {
-                Scanner scanner = new Scanner(file);
-                while (scanner.hasNextLine()) {
-                    labelList.add(scanner.nextLine());
-                }
-                scanner.close();
-            } catch (FileNotFoundException e) {
+                BufferedReader br = new BufferedReader(new FileReader(file));
+                String string;
+                while((string = br.readLine()) != null)
+                    labelList.add(string);
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
