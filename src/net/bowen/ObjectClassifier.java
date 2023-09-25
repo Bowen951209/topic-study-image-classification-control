@@ -69,7 +69,9 @@ public class ObjectClassifier extends JFrame {
      * <a href="https://github.com/Bowen951209/topic-study-image-classification-control/blob/48d7def412acc89bb5d174428328e3a9c2e783be/resources/figures/figure0.png">figure</a>
      */
     private void findObjects(List<Mat> outputBlobs, Mat img) {
-        List<Prediction> predictionList = new ArrayList<>();
+        List<Rect2d> rectList = new ArrayList<>();
+        List<Integer> labelIDList = new ArrayList<>();
+        List<Float> confidenceList = new ArrayList<>();
 
         for (Mat outputBlob : outputBlobs) {
             for (int row = 0; row < outputBlob.height(); row++) {
@@ -77,38 +79,48 @@ public class ObjectClassifier extends JFrame {
                 double confidence = outputBlob.get(row, 4)[0];
                 if (confidence < .5)// if the confidence is low, don't consider
                     continue;
-                Prediction prediction = new Prediction();
-                predictionList.add(prediction);
-                prediction.confidence = confidence;
+                confidenceList.add((float) confidence);
 
                 // find what label is the most possible in this row
-                prediction.labelID = findMaxInRow(outputBlob, row) - 5;
+                labelIDList.add(findMaxInRow(outputBlob, row) - 5);
 
                 // store the rectangle
-                Rect rect = new Rect();
+                Rect2d rect = new Rect2d();
                 rect.width = (int) (outputBlob.get(row, 2)[0] * img.width());
                 rect.height = (int) (outputBlob.get(row, 3)[0] * img.height());
                 rect.x = (int) (outputBlob.get(row, 0)[0] * img.width() - rect.width / 2);
                 rect.y = (int) (outputBlob.get(row, 1)[0] * img.height() - rect.height / 2);
-                prediction.rectangle = rect;
+                rectList.add(rect);
             }
         }
 
-        for (Prediction prediction : predictionList) {
+        MatOfRect2d matOfRect = new MatOfRect2d();
+        matOfRect.fromList(rectList);
+        MatOfFloat matOfConfidence = new MatOfFloat();
+        matOfConfidence.fromList(confidenceList);
+
+        // ----------Remove same rectangles---------
+        // indices pointing out which indices are the final result
+        MatOfInt resultIndicesMat = new MatOfInt();
+        Dnn.NMSBoxes(matOfRect, matOfConfidence, .5f, .3f, resultIndicesMat);
+        // -------------------------------------------
+
+        for (int idx : resultIndicesMat.toList()) {
             // draw rectangles
-            Imgproc.rectangle(img, prediction.rectangle, new Scalar(0, 255, 0));
+            Rect2d rect2d = rectList.get(idx);
+            Rect rect = new Rect((int) rect2d.x, (int) rect2d.y, (int) rect2d.width, (int) rect2d.height);
+            Imgproc.rectangle(img, rect, new Scalar(0, 255, 0));
 
             // draw texts
-            Imgproc.putText(img, prediction.labelID + " " + prediction.confidence,
-                    new Point(prediction.rectangle.x,
-                    prediction.rectangle.y), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0, 0)
-                    , 2);
+            Imgproc.putText(img, labelIDList.get(idx) + " " + confidenceList.get(idx),
+                    new Point(rect.x, rect.y), Imgproc.FONT_HERSHEY_SIMPLEX, 1, new Scalar(0, 0,
+                            0), 2);
         }
     }
 
     /**
      * This method only finds colum 5 ~ ...  According to  <a href="https://github.com/Bowen951209/topic-study-image-classification-control/blob/48d7def412acc89bb5d174428328e3a9c2e783be/resources/figures/figure0.png">figure</a>
-     * */
+     */
     private static int findMaxInRow(Mat mat, int row) {
         double maxScore = 0;
         int maxIndex = -1;
@@ -128,12 +140,6 @@ public class ObjectClassifier extends JFrame {
 
         // Show on window.
         new ObjectClassifier();
-    }
-
-    private static class Prediction {
-        private double confidence = 0;
-        private int labelID = -1;
-        private Rect rectangle;
     }
 
 }
