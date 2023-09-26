@@ -158,7 +158,16 @@ public class ObjectClassifier extends JFrame {
     }
 
     public static void main(String[] args) {
-        // TODO: 2023/9/25 auto download weights file if not exist in local
+        if (new File("resources/externalFiles/yolov3.weights").exists()) {
+            System.out.println("Weight file exists!");
+        } else {
+            System.out.println("Weight file doesn't exist, downloading...");
+            long startTime = System.currentTimeMillis();
+            FileDownloader.download("https://pjreddie.com/media/files/yolov3.weights", MODEL_WEIGHTS_SRC);
+            long time = System.currentTimeMillis() - startTime;
+            System.out.println("Download complete in: " + time * .001 + "s.");
+        }
+
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
