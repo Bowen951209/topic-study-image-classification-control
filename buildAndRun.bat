@@ -2,7 +2,7 @@
 
 REM === Inputs ===
 set PROJ_ROOT=.\
-set APP_STARTER=FaceClassifier
+set APP_STARTER=ObjectClassifier
 set APP_STARTER_PACKAGE=net.bowen
 REM ===
 
@@ -19,11 +19,11 @@ md "%BIN_DIR%"
 REM ===
 
 REM === Compile ===
-"%JAVA_HOME%\bin\java" -version
+java -version
 echo.
 
 echo Compiling...
-"%JAVA_HOME%\bin\javac" ^
+javac ^
     -cp %LIBS_DIR%\*.jar ^
 	-d "%BIN_DIR%" ^
 	-sourcepath %SRC_DIR% ^
@@ -39,7 +39,7 @@ echo.
 REM ===
 
 REM === Run ===
-"%JAVA_HOME%\bin\java" -cp %LIBS_DIR%\*;"%BIN_DIR%" -Djava.library.path="%LIBS_DIR%" %APP_STARTER_PACKAGE%.%APP_STARTER%
+java -cp %LIBS_DIR%\*;"%BIN_DIR%" -Djava.library.path="%LIBS_DIR%" %APP_STARTER_PACKAGE%.%APP_STARTER%
 
 if errorlevel 1 (
 	echo runtime:error
