@@ -8,6 +8,7 @@ import java.nio.channels.ReadableByteChannel;
 
 public class FileDownloader {
     private FileOutputStream fileOutputStream;
+    private Thread progressPrinter;
     private boolean wantListenProgress;
     private boolean isFinishDownload;
     private int progressListenPeriod;
@@ -32,35 +33,27 @@ public class FileDownloader {
 
             fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
             isFinishDownload = true;
-
+            progressPrinter.interrupt();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void printProgress() {
-        Thread progressPrinter = new Thread(() -> {
+        progressPrinter = new Thread(() -> {
             try {
                 double wholeSize =
                         url.openConnection().getContentLength() * 0.00000095367432;
-                long startTime = System.currentTimeMillis();
-                long elapsedTime = 0;
-                do {
-                    if (elapsedTime <= progressListenPeriod) {
-                        elapsedTime = System.currentTimeMillis() - startTime;
-                        continue;
-                    }
-
-                    elapsedTime = 0;
-                    startTime = System.currentTimeMillis();
-
+                while (!isFinishDownload) {
                     double currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
                     System.out.printf("%.2f MB / %.2f MB\n", currentSizeMB, wholeSize);
-                } while (!isFinishDownload);
+                    //noinspection BusyWait
+                    Thread.sleep(progressListenPeriod);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            }
-        });
+            } catch (InterruptedException e) {/*will be interrupted in expectation, so do nothing*/}
+        }, "downloadProgressListener");
         progressPrinter.start();
     }
 }
