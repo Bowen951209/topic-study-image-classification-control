@@ -163,9 +163,10 @@ public class ObjectClassifier extends JFrame {
         } else {
             System.out.println("Weight file doesn't exist, downloading...");
             long startTime = System.currentTimeMillis();
-            FileDownloader.download("https://pjreddie.com/media/files/yolov3.weights", MODEL_WEIGHTS_SRC);
+            new FileDownloader().listenProgress(500)
+                    .download("https://pjreddie.com/media/files/yolov3.weights", MODEL_WEIGHTS_SRC);
             long time = System.currentTimeMillis() - startTime;
-            System.out.println("Download complete in: " + time * .001 + "s.");
+            System.out.printf("Download complete in: %.2f seconds.", time * .001);
         }
 
         // Init
