@@ -12,6 +12,8 @@ public class FileDownloader {
     private boolean wantListenProgress;
     private boolean isFinishDownload;
     private int progressListenPeriod;
+    private double currentSizeMB, wholeSize, percentage;
+    private String barString;
     private URL url;
 
     public FileDownloader listenProgress(int period) {
@@ -32,8 +34,14 @@ public class FileDownloader {
             if (wantListenProgress) printProgress();
 
             fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
+
             isFinishDownload = true;
-            progressPrinter.interrupt();
+            // show value to 100%
+            System.out.printf("%s %.2f MB / %.2f MB; ",
+                    barString.replaceAll(" ", "■"),
+                    wholeSize,
+                    wholeSize);
+            if (wantListenProgress) progressPrinter.interrupt();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -41,12 +49,17 @@ public class FileDownloader {
 
     private void printProgress() {
         progressPrinter = new Thread(() -> {
+            barString = null;
             try {
-                double wholeSize =
-                        url.openConnection().getContentLength() * 0.00000095367432;
+                wholeSize = url.openConnection().getContentLength() * 0.00000095367432;
                 while (!isFinishDownload) {
-                    double currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
-                    System.out.printf("%.2f MB / %.2f MB\n", currentSizeMB, wholeSize);
+                    currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
+                    percentage = currentSizeMB / wholeSize * 100;
+                    barString = "[                    ]";// 20 blanks
+                    for (int i = 0; i < (int) (percentage / 5); i++)
+                        barString = barString.replaceFirst(" ", "■");
+
+                    System.out.printf("%s %.2f MB / %.2f MB\r", barString, currentSizeMB, wholeSize);
                     //noinspection BusyWait
                     Thread.sleep(progressListenPeriod);
                 }
