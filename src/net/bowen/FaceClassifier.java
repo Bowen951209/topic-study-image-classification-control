@@ -46,6 +46,7 @@ public class FaceClassifier extends JFrame {
         for (Rect rect : faceDetections.toArray()) {
             Imgproc.rectangle(img, rect, new Scalar(0, 255, 0));
         }
+        faceDetections.release();
 
         // Convert img to mat of bytes
         MatOfByte mat = new MatOfByte();
@@ -55,6 +56,8 @@ public class FaceClassifier extends JFrame {
         try {
             new FaceClassifier(img.width(), img.height(),
                     ImageIO.read(new ByteArrayInputStream(mat.toArray())));
+            mat.release();
+            img.release();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
