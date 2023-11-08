@@ -35,6 +35,7 @@ public class ObjectClassifier extends JFrame {
         Mat blob = Dnn.blobFromImage(imgMat, 1f / 255f, new Size(320, 320),
                 new Scalar(0, 0, 0), true, false);
         net.setInput(blob);
+        blob.release();
 
         List<String> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
 
@@ -47,10 +48,12 @@ public class ObjectClassifier extends JFrame {
         // Convert img to bufferedImage
         MatOfByte matOfByte = new MatOfByte();
         Imgcodecs.imencode(".jpg", imgMat, matOfByte);
+        imgMat.release();
         BufferedImage bufferedImage;
         try {
             bufferedImage =
                     ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
+            matOfByte.release();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -58,7 +61,7 @@ public class ObjectClassifier extends JFrame {
         // Prepare for window
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
-        setSize(imgMat.width(), imgMat.height());
+        setSize(bufferedImage.getWidth(), bufferedImage.getHeight());
         setTitle(Path.of(IMG_SRC).getFileName().toString());
         add(new JLabel(new ImageIcon(bufferedImage)));
         setVisible(true);
