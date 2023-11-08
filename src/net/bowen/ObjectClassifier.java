@@ -59,7 +59,7 @@ public class ObjectClassifier extends JFrame {
         }
 
         // Prepare for window
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setSize(bufferedImage.getWidth(), bufferedImage.getHeight());
         setTitle(Path.of(IMG_SRC).getFileName().toString());
