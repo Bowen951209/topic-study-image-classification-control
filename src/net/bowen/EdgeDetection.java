@@ -15,6 +15,7 @@ public class EdgeDetection extends JFrame {
      * Reference: https://chtseng.wordpress.com/2016/12/05/opencv-edge-detection%E9%82%8A%E7%B7%A3%E5%81%B5%E6%B8%AC/
      * */
     public EdgeDetection() {
+        // TODO: 2023/11/8 Release native objects in this class.
         // Prepare fot image
         Mat src = Imgcodecs.imread("resources/pictures/houmai.jpg");
         Imgproc.resize(src, src, new Size(), .8, .8);
