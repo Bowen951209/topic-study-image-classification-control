@@ -169,7 +169,7 @@ public class ObjectClassifier extends JFrame {
             new FileDownloader().listenProgress(500)
                     .download("https://pjreddie.com/media/files/yolov3.weights", MODEL_WEIGHTS_SRC);
             long time = System.currentTimeMillis() - startTime;
-            System.out.printf("Download complete in: %.2f seconds.", time * .001);
+            System.out.printf("Download complete in: %.2f seconds.\n", time * .001);
         }
 
         // Init
