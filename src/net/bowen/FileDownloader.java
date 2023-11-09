@@ -1,5 +1,6 @@
 package net.bowen;
 
+import javax.swing.*;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -8,12 +9,11 @@ import java.nio.channels.ReadableByteChannel;
 
 public class FileDownloader {
     private FileOutputStream fileOutputStream;
-    private Thread progressPrinter;
+    private Timer progressTimer;
     private boolean wantListenProgress;
     private boolean isFinishDownload;
     private int progressListenPeriod;
     private double currentSizeMB, wholeSize, percentage;
-    private String barString;
     private URL url;
 
     public FileDownloader listenProgress(int period) {
@@ -34,39 +34,40 @@ public class FileDownloader {
             if (wantListenProgress) printProgress();
 
             fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
-
             isFinishDownload = true;
-            // show value to 100%
-            System.out.printf("%s %.2f MB / %.2f MB; ",
-                    barString.replaceAll(" ", "■"),
-                    wholeSize,
-                    wholeSize);
-            if (wantListenProgress) progressPrinter.interrupt();
+
+            // Print the 100%
+            System.out.printf("\r[■■■■■■■■■■■■■■■■■■■■] %.2f MB / %.2f MB\n", wholeSize, wholeSize);
+
+            if (progressTimer != null) progressTimer.stop();
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void printProgress() {
-        progressPrinter = new Thread(() -> {
-            barString = null;
+        // TODO: 2023/11/8 Use StringBuilder
+        progressTimer = new Timer(progressListenPeriod, (event -> {
             try {
+                String barString;
                 wholeSize = url.openConnection().getContentLength() * 0.00000095367432;
-                while (!isFinishDownload) {
-                    currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
-                    percentage = currentSizeMB / wholeSize * 100;
-                    barString = "[                    ]";// 20 blanks
-                    for (int i = 0; i < (int) (percentage / 5); i++)
-                        barString = barString.replaceFirst(" ", "■");
+                currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
+                percentage = currentSizeMB / wholeSize * 100;
+                barString = "[                    ]";// 20 blanks
+                for (int i = 0; i < (int) (percentage / 5); i++)
+                    barString = barString.replaceFirst(" ", "■");
 
-                    System.out.printf("%s %.2f MB / %.2f MB\r", barString, currentSizeMB, wholeSize);
-                    //noinspection BusyWait
-                    Thread.sleep(progressListenPeriod);
-                }
+
+                // If the "if-statement" is not here, progress printing will have bug.
+                // The reason I think is that this timer is called even after the download is
+                // complete. So I just make sure we only print when !isFinishDownload.
+                if (!isFinishDownload)
+                    System.out.printf("\r%s %.2f MB / %.2f MB", barString, currentSizeMB, wholeSize);
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            } catch (InterruptedException e) {/*will be interrupted in expectation, so do nothing*/}
-        }, "downloadProgressListener");
-        progressPrinter.start();
+            }
+        }));
+        progressTimer.start();
     }
 }
