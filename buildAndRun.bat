@@ -27,7 +27,8 @@ javac ^
     -cp %LIBS_DIR%\*.jar ^
 	-d "%BIN_DIR%" ^
 	-sourcepath %SRC_DIR% ^
-	"%SRC_DIR%\%APP_STARTER_DIR%\%APP_STARTER%.java"
+	"%SRC_DIR%\%APP_STARTER_DIR%\%APP_STARTER%.java" ^
+	-encoding utf8
 
 if errorlevel 1 (
 	echo compile:error
