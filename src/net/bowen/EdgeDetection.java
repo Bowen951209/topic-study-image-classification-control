@@ -22,12 +22,12 @@ public class EdgeDetection extends JFrame {
         // Turn to gray scale
         Mat grayScale = new Mat();
         Imgproc.cvtColor(src, grayScale, Imgproc.COLOR_BGR2GRAY);
-	src.release();
+        src.release();
 
         // Apply Laplacian edge detection
         Mat finalImg = new Mat();
         Imgproc.Laplacian(grayScale, finalImg, CvType.CV_16S, 3, 1, 0, Core.BORDER_DEFAULT);
-	grayScale.release();
+        grayScale.release();
 
         // converting back to CV_8U
         Core.convertScaleAbs(finalImg, finalImg);
@@ -35,12 +35,12 @@ public class EdgeDetection extends JFrame {
         // Convert img to bufferedImage
         MatOfByte matOfByte = new MatOfByte();
         Imgcodecs.imencode(".jpg", finalImg, matOfByte);
-	finalImg.release();
+        finalImg.release();
 
         BufferedImage bufferedImage;
         try {
             bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
-	    matOfByte.release();
+            matOfByte.release();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
