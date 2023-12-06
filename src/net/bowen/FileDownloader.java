@@ -47,23 +47,24 @@ public class FileDownloader {
     }
 
     private void printProgress() {
-        // TODO: 2023/11/8 Use StringBuilder
         progressTimer = new Timer(progressListenPeriod, (event -> {
             try {
-                String barString;
                 wholeSize = url.openConnection().getContentLength() * 0.00000095367432;
                 currentSizeMB = fileOutputStream.getChannel().size() * 0.00000095367432;
                 percentage = currentSizeMB / wholeSize * 100;
-                barString = "[                    ]";// 20 blanks
-                for (int i = 0; i < (int) (percentage / 5); i++)
-                    barString = barString.replaceFirst(" ", "■");
+
+                StringBuilder stringBuilder = new StringBuilder("[                    ]");// 20 blanks
+                for (int i = 0; i < (int) (percentage / 5); i++) {
+                    int indexOfFirstBlank = stringBuilder.indexOf(" ");
+                    stringBuilder.replace(indexOfFirstBlank, indexOfFirstBlank + 1, "■");
+                }
 
 
                 // If the "if-statement" is not here, progress printing will have bug.
                 // The reason I think is that this timer is called even after the download is
                 // complete. So I just make sure we only print when !isFinishDownload.
                 if (!isFinishDownload)
-                    System.out.printf("\r%s %.2f MB / %.2f MB", barString, currentSizeMB, wholeSize);
+                    System.out.printf("\r%s %.2f MB / %.2f MB", stringBuilder, currentSizeMB, wholeSize);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
