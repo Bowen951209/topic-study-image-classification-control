@@ -10,15 +10,14 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class EdgeDetection extends JFrame {
+public class EdgeDetector extends JFrame {
     /*
      * Reference: https://chtseng.wordpress.com/2016/12/05/opencv-edge-detection%E9%82%8A%E7%B7%A3%E5%81%B5%E6%B8%AC/
      * */
-    public EdgeDetection(Mat imgMat, String title) {
+    public EdgeDetector(Mat imgMat, String title) {
         // Convert imgMat to bufferedImage
         MatOfByte matOfByte = new MatOfByte();
         Imgcodecs.imencode(".jpg", imgMat, matOfByte);
-        imgMat.release();
 
         BufferedImage bufferedImage;
         try {
@@ -37,14 +36,17 @@ public class EdgeDetection extends JFrame {
         setVisible(true);
     }
 
-    public static Mat laplacianEdgeDetection(Mat src) {
+    /**
+     * Apply the laplacian edge detection.
+     * @return The result img.
+     * */
+    public static Mat laplacian(Mat src) {
         // Prepare fot image
         Imgproc.resize(src, src, new Size(), .8, .8);
 
         // Turn to gray scale
         Mat grayScale = new Mat();
         Imgproc.cvtColor(src, grayScale, Imgproc.COLOR_BGR2GRAY);
-        src.release();
 
         // Apply Laplacian edge detection
         Mat finalImg = new Mat();
@@ -63,8 +65,11 @@ public class EdgeDetection extends JFrame {
         Mat src = Imgcodecs.imread("resources/pictures/houmai.jpg");
 
         // Get laplacian.
-        Mat laplacianResult = laplacianEdgeDetection(src);
+        Mat laplacianResult = laplacian(src);
         // Create new window to display img.
-        new EdgeDetection(laplacianResult, "Laplacian Edge Detection");
+        new EdgeDetector(laplacianResult, "Laplacian Edge Detection");
+        laplacianResult.release();
+
+        src.release();
     }
 }
