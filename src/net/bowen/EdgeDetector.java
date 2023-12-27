@@ -1,40 +1,18 @@
 package net.bowen;
 
-import org.opencv.core.*;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 public class EdgeDetector extends JFrame {
     /*
      * Reference: https://chtseng.wordpress.com/2016/12/05/opencv-edge-detection%E9%82%8A%E7%B7%A3%E5%81%B5%E6%B8%AC/
      * */
-    public EdgeDetector(Mat imgMat, String title) {
-        // Convert imgMat to bufferedImage
-        MatOfByte matOfByte = new MatOfByte();
-        Imgcodecs.imencode(".jpg", imgMat, matOfByte);
-
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
-            matOfByte.release();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Prepare for window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-        setSize(bufferedImage.getWidth(), bufferedImage.getHeight());
-        setTitle(title);
-        add(new JLabel(new ImageIcon(bufferedImage)));
-        setVisible(true);
-    }
 
     /**
      * Apply the laplacian edge detection.
@@ -82,6 +60,17 @@ public class EdgeDetector extends JFrame {
         return sobelXY;
     }
 
+    public static Mat canny(Mat src, double threshold1, double threshold2) {
+        Mat grayScale = new Mat();
+        Imgproc.cvtColor(src, grayScale, Imgproc.COLOR_BGR2GRAY);
+
+        Mat result = new Mat();
+        Imgproc.Canny(grayScale, result, threshold1, threshold2);
+        grayScale.release();
+
+        return result;
+    }
+
     public static void main(String[] args) {
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -91,13 +80,18 @@ public class EdgeDetector extends JFrame {
         // Get laplacian.
         Mat laplacianResult = laplacian(src);
         // Create new window to display img.
-        new EdgeDetector(laplacianResult, "Laplacian Edge Detection");
+        new ImageMatDisplayer(laplacianResult, "Laplacian Edge Detection");
         laplacianResult.release();
 
         // Get sobel.
         Mat sobelResult = sobel(src);
-        new EdgeDetector(sobelResult, "Sobel Edge Detection");
+        new ImageMatDisplayer(sobelResult, "Sobel Edge Detection");
         sobelResult.release();
+
+        // Get canny.
+        Mat cannyResult = canny(src, 100, 500);
+        new ImageMatDisplayer(cannyResult, "Canny Edge Detection");
+        cannyResult.release();
 
         src.release();
     }

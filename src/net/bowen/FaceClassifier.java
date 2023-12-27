@@ -5,30 +5,15 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 
 public class FaceClassifier extends JFrame {
-    private static final String IMG_SRC = "resources/pictures/MeAndSister.JPG";
-
-    private FaceClassifier(int width, int height, BufferedImage img) {
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setResizable(false);
-        setSize(width, height);
-        setTitle(Path.of(IMG_SRC).getFileName().toString());
-        add(new JLabel(new ImageIcon(img)));
-        setVisible(true);
-    }
-
-
     public static void main(String[] args) {
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         CascadeClassifier faceDetector = new CascadeClassifier("resources/haarcascades/lbpcascade_frontalface.xml");
+        final String IMG_SRC = "resources/pictures/MeAndSister.JPG";
 
         // Import image.
         Mat img = Imgcodecs.imread(IMG_SRC);
@@ -48,18 +33,7 @@ public class FaceClassifier extends JFrame {
         }
         faceDetections.release();
 
-        // Convert img to mat of bytes
-        MatOfByte mat = new MatOfByte();
-        Imgcodecs.imencode(".jpg", img, mat);
-
-        // Show on window.
-        try {
-            new FaceClassifier(img.width(), img.height(),
-                    ImageIO.read(new ByteArrayInputStream(mat.toArray())));
-            mat.release();
-            img.release();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        // Display
+        new ImageMatDisplayer(img, Path.of(IMG_SRC).getFileName().toString());
     }
 }

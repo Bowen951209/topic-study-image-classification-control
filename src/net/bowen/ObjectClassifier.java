@@ -6,25 +6,23 @@ import org.opencv.dnn.Net;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.nio.file.Path;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ObjectClassifier extends JFrame {
-    private static final String IMG_SRC = "resources/pictures/kids.jpg";
     private static final String MODEL_CFG_SRC = "resources/yolo/yolov3-320.cfg";
     private static final String MODEL_WEIGHTS_SRC = "resources/externalFiles/yolov3.weights";
     private static final String LABEL_NAME_LIST_SRC = "resources/yolo/coco.names";
     private static List<String> labelList;
 
-    private ObjectClassifier() {
+    public static void detect(Mat src, Mat target) {
         // Prepare fot image
-        Mat imgMat = Imgcodecs.imread(IMG_SRC);
-        Imgproc.resize(imgMat, imgMat, new Size(), .3, .3);
+        Imgproc.resize(src, target, new Size(), .3, .3);
 
         // Prepare for model
         Net net = Dnn.readNetFromDarknet(MODEL_CFG_SRC, MODEL_WEIGHTS_SRC);
@@ -32,7 +30,7 @@ public class ObjectClassifier extends JFrame {
         net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
 
         // Passing picture into network
-        Mat blob = Dnn.blobFromImage(imgMat, 1f / 255f, new Size(320, 320),
+        Mat blob = Dnn.blobFromImage(target, 1f / 255f, new Size(320, 320),
                 new Scalar(0, 0, 0), true, false);
         net.setInput(blob);
         blob.release();
@@ -42,29 +40,7 @@ public class ObjectClassifier extends JFrame {
         List<Mat> outputBlobs = new ArrayList<>();
         net.forward(outputBlobs, unconnectedOutLayersNames);
 
-        findObjects(outputBlobs, imgMat);
-
-
-        // Convert img to bufferedImage
-        MatOfByte matOfByte = new MatOfByte();
-        Imgcodecs.imencode(".jpg", imgMat, matOfByte);
-        imgMat.release();
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage =
-                    ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
-            matOfByte.release();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        // Prepare for window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-        setSize(bufferedImage.getWidth(), bufferedImage.getHeight());
-        setTitle(Path.of(IMG_SRC).getFileName().toString());
-        add(new JLabel(new ImageIcon(bufferedImage)));
-        setVisible(true);
+        findObjects(outputBlobs, target);
     }
 
 
@@ -72,7 +48,7 @@ public class ObjectClassifier extends JFrame {
      * Calculation rule according to:
      * <a href="https://github.com/Bowen951209/topic-study-image-classification-control/blob/48d7def412acc89bb5d174428328e3a9c2e783be/resources/figures/figure0.png">figure</a>
      */
-    private void findObjects(List<Mat> outputBlobs, Mat img) {
+    private static void findObjects(List<Mat> outputBlobs, Mat img) {
         List<Rect2d> rectList = new ArrayList<>();
         List<Integer> labelIDList = new ArrayList<>();
         List<Float> confidenceList = new ArrayList<>();
@@ -169,14 +145,20 @@ public class ObjectClassifier extends JFrame {
             new FileDownloader().listenProgress(500)
                     .download("https://pjreddie.com/media/files/yolov3.weights", MODEL_WEIGHTS_SRC);
             long time = System.currentTimeMillis() - startTime;
-            System.out.printf("Download complete in: %.2f seconds.\n", time * .001);
+            System.out.printf("Download complete in: %.2f seconds.\n", time * .001f);
         }
 
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
+        Mat src = Imgcodecs.imread("resources/pictures/kids.jpg");
+        Mat res = new Mat();
+        detect(src, res);
+        src.release();
+
         // Show on window.
-        new ObjectClassifier();
+        new ImageMatDisplayer(res, "Object Classifier");
+        res.release();
     }
 
 }
