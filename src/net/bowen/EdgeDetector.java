@@ -38,12 +38,10 @@ public class EdgeDetector extends JFrame {
 
     /**
      * Apply the laplacian edge detection.
+     *
      * @return The result img.
-     * */
+     */
     public static Mat laplacian(Mat src) {
-        // Prepare fot image
-        Imgproc.resize(src, src, new Size(), .8, .8);
-
         // Turn to gray scale
         Mat grayScale = new Mat();
         Imgproc.cvtColor(src, grayScale, Imgproc.COLOR_BGR2GRAY);
@@ -59,16 +57,47 @@ public class EdgeDetector extends JFrame {
         return finalImg;
     }
 
+    /**
+     * Apply the sobel edge detection.
+     *
+     * @return The result img.
+     */
+    public static Mat sobel(Mat src) {
+        Mat grayScale = new Mat();
+        Imgproc.cvtColor(src, grayScale, Imgproc.COLOR_BGR2GRAY);
+
+        Mat sobelX = new Mat();
+        Mat sobelY = new Mat();
+        Mat sobelXY = new Mat();
+        Imgproc.Sobel(grayScale, sobelX, CvType.CV_64F, 1, 1);
+        Imgproc.Sobel(grayScale, sobelY, CvType.CV_64F, 0, 1);
+        Core.convertScaleAbs(sobelX, sobelX);
+        Core.convertScaleAbs(sobelY, sobelY);
+        Core.bitwise_or(sobelX, sobelY, sobelXY);
+
+        sobelX.release();
+        sobelY.release();
+        grayScale.release();
+
+        return sobelXY;
+    }
+
     public static void main(String[] args) {
         // Init
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
         Mat src = Imgcodecs.imread("resources/pictures/houmai.jpg");
+        Imgproc.resize(src, src, new Size(), .5f, .5f);
 
         // Get laplacian.
         Mat laplacianResult = laplacian(src);
         // Create new window to display img.
         new EdgeDetector(laplacianResult, "Laplacian Edge Detection");
         laplacianResult.release();
+
+        // Get sobel.
+        Mat sobelResult = sobel(src);
+        new EdgeDetector(sobelResult, "Sobel Edge Detection");
+        sobelResult.release();
 
         src.release();
     }
