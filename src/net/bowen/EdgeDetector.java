@@ -80,17 +80,17 @@ public class EdgeDetector extends JFrame {
         // Get laplacian.
         Mat laplacianResult = laplacian(src);
         // Create new window to display img.
-        new ImageMatDisplayer(laplacianResult, "Laplacian Edge Detection");
+        new ImageMatDisplay(laplacianResult, "Laplacian Edge Detection");
         laplacianResult.release();
 
         // Get sobel.
         Mat sobelResult = sobel(src);
-        new ImageMatDisplayer(sobelResult, "Sobel Edge Detection");
+        new ImageMatDisplay(sobelResult, "Sobel Edge Detection");
         sobelResult.release();
 
         // Get canny.
         Mat cannyResult = canny(src, 100, 500);
-        new ImageMatDisplayer(cannyResult, "Canny Edge Detection");
+        new ImageMatDisplay(cannyResult, "Canny Edge Detection");
         cannyResult.release();
 
         src.release();

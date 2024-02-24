@@ -34,6 +34,6 @@ public class FaceClassifier extends JFrame {
         faceDetections.release();
 
         // Display
-        new ImageMatDisplayer(img, Path.of(IMG_SRC).getFileName().toString());
+        new ImageMatDisplay(img, Path.of(IMG_SRC).getFileName().toString());
     }
 }

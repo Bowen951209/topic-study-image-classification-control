@@ -157,7 +157,7 @@ public class ObjectClassifier extends JFrame {
         src.release();
 
         // Show on window.
-        new ImageMatDisplayer(res, "Object Classifier");
+        new ImageMatDisplay(res, "Object Classifier");
         res.release();
     }
 

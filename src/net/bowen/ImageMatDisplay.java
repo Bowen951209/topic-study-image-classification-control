@@ -10,8 +10,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-public class ImageMatDisplayer extends JFrame {
-    public ImageMatDisplayer(Mat imgMat, String title){
+public class ImageMatDisplay extends JFrame {
+    public ImageMatDisplay(Mat imgMat, String title){
         // Convert imgMat to bufferedImage
         MatOfByte matOfByte = new MatOfByte();
         Imgcodecs.imencode(".jpg", imgMat, matOfByte);
