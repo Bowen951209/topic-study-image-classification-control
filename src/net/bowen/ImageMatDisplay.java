@@ -4,32 +4,37 @@ import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.imgcodecs.Imgcodecs;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.awt.image.DataBufferByte;
 
 public class ImageMatDisplay extends JFrame {
-    public ImageMatDisplay(Mat imgMat, String title){
-        // Convert imgMat to bufferedImage
-        MatOfByte matOfByte = new MatOfByte();
-        Imgcodecs.imencode(".jpg", imgMat, matOfByte);
+    private final Mat imgMat;
+    private final MatOfByte matOfByte = new MatOfByte();
+    private final BufferedImage bufferedImage;
 
-        BufferedImage bufferedImage;
-        try {
-            bufferedImage = ImageIO.read(new ByteArrayInputStream(matOfByte.toArray()));
-            matOfByte.release();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    public ImageMatDisplay(Mat imgMat, String title) {
+        this.imgMat = imgMat;
+        this.bufferedImage = new BufferedImage(imgMat.width(), imgMat.height(), BufferedImage.TYPE_3BYTE_BGR);
+
+        refresh();
 
         // Prepare for window
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         setSize(bufferedImage.getWidth(), bufferedImage.getHeight());
         setTitle(title);
         add(new JLabel(new ImageIcon(bufferedImage)));
         setVisible(true);
+    }
+
+    public void refresh() {
+        Imgcodecs.imencode(".jpg", imgMat, matOfByte);
+
+        // Get the BufferedImage's backing array and copy the pixels directly into it
+        byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
+        imgMat.get(0, 0, data);
+
+        repaint();
     }
 }
