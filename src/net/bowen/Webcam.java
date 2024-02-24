@@ -9,17 +9,23 @@ public class Webcam {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         VideoCapture videoCapture = new VideoCapture(0);
-        Mat img = new Mat();
-        videoCapture.read(img);
+        Mat camImg = new Mat();
+        Mat displayImg = new Mat();
+        videoCapture.read(camImg);
+        ObjectClassifier.detect(camImg, displayImg);
 
-        ImageMatDisplay display = new ImageMatDisplay(img, "webcam");
+        ImageMatDisplay display = new ImageMatDisplay(displayImg, "webcam");
         while (display.isDisplayable()) {
-            videoCapture.read(img);
+            videoCapture.read(camImg);
+            ObjectClassifier.detect(camImg, displayImg);
+
             display.refresh();
         }
 
 
 
         videoCapture.release();
+        camImg.release();
+        displayImg.release();
     }
 }
