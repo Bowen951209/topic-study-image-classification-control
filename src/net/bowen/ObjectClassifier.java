@@ -18,16 +18,13 @@ public class ObjectClassifier extends JFrame {
     private static final String MODEL_CFG_SRC = "resources/yolo/yolov3-320.cfg";
     private static final String MODEL_WEIGHTS_SRC = "resources/externalFiles/yolov3.weights";
     private static final String LABEL_NAME_LIST_SRC = "resources/yolo/coco.names";
+    private static final Net net = getNet();
+
     private static List<String> labelList;
 
     public static void detect(Mat src, Mat target) {
-        // Prepare fot image
+        // Prepare fot image, scale x0.3
         Imgproc.resize(src, target, new Size(), .3, .3);
-
-        // Prepare for model
-        Net net = Dnn.readNetFromDarknet(MODEL_CFG_SRC, MODEL_WEIGHTS_SRC);
-        net.setPreferableBackend(Dnn.DNN_BACKEND_OPENCV);
-        net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
 
         // Passing picture into network
         Mat blob = Dnn.blobFromImage(target, 1f / 255f, new Size(320, 320),
@@ -41,6 +38,10 @@ public class ObjectClassifier extends JFrame {
         net.forward(outputBlobs, unconnectedOutLayersNames);
 
         findObjects(outputBlobs, target);
+
+        for (Mat outputBlob : outputBlobs) {
+            outputBlob.release();
+        }
     }
 
 
@@ -83,7 +84,14 @@ public class ObjectClassifier extends JFrame {
         // indices pointing out which indices are the final result
         MatOfInt resultIndicesMat = new MatOfInt();
         Dnn.NMSBoxes(matOfRect, matOfConfidence, .5f, .3f, resultIndicesMat);
+
+        matOfRect.release();
+        matOfConfidence.release();
         // -------------------------------------------
+
+        // If the size of resultIndicesMat can't convert to list, return.
+        Size size = resultIndicesMat.size();
+        if (size.width == 0 || size.height == 0) return;
 
         for (int idx : resultIndicesMat.toList()) {
             // draw rectangles
@@ -134,6 +142,15 @@ public class ObjectClassifier extends JFrame {
 
     private static String toPercentage(float v) {
         return (int)(v * 100) + "%";
+    }
+
+    private static Net getNet() {
+        // Prepare for model
+        Net net = Dnn.readNetFromDarknet(MODEL_CFG_SRC, MODEL_WEIGHTS_SRC);
+        net.setPreferableBackend(Dnn.DNN_BACKEND_OPENCV);
+        net.setPreferableTarget(Dnn.DNN_TARGET_CPU);
+
+        return net;
     }
 
     public static void main(String[] args) {
