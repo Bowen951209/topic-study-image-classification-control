@@ -114,7 +114,7 @@ public class ObjectClassifier extends JFrame {
         double maxScore = 0;
         int maxIndex = -1;
         for (int column = 5; column < mat.width(); column++) {
-            if (mat.get(row, column)[0] > maxScore) {
+            if (mat.get(row, column)[0] >= maxScore) {
                 maxScore = mat.get(row, column)[0];
                 maxIndex = column;
             }
