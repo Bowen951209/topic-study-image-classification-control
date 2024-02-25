@@ -18,11 +18,20 @@ public class ObjectClassifier extends JFrame {
     private static final String MODEL_CFG_SRC = "resources/yolo/yolov3-320.cfg";
     private static final String MODEL_WEIGHTS_SRC = "resources/externalFiles/yolov3.weights";
     private static final String LABEL_NAME_LIST_SRC = "resources/yolo/coco.names";
-    private static final Net net = getNet();
 
+    private static Net net;
     private static List<String> labelList;
 
-    public static void detect(Mat src, Mat target) {
+    private final List<Mat> outputBlobs = new ArrayList<>();
+    private final List<Rect2d> rectList = new ArrayList<>();
+    private final List<Integer> labelIDList = new ArrayList<>();
+    private final List<Float> confidenceList = new ArrayList<>();
+
+    public ObjectClassifier() {
+        if (net == null) net = getNet();
+    }
+
+    public void detect(Mat src, Mat target) {
         // Prepare fot image, scale x0.3
         Imgproc.resize(src, target, new Size(), .3, .3);
 
@@ -32,7 +41,6 @@ public class ObjectClassifier extends JFrame {
         net.setInput(blob);
         blob.release();
 
-        List<Mat> outputBlobs = new ArrayList<>();
         net.forward(outputBlobs, net.getUnconnectedOutLayersNames());
 
         findObjects(outputBlobs, target);
@@ -47,11 +55,7 @@ public class ObjectClassifier extends JFrame {
      * Calculation rule according to:
      * <a href="https://github.com/Bowen951209/topic-study-image-classification-control/blob/48d7def412acc89bb5d174428328e3a9c2e783be/resources/figures/figure0.png">figure</a>
      */
-    private static void findObjects(List<Mat> outputBlobs, Mat img) {
-        List<Rect2d> rectList = new ArrayList<>();
-        List<Integer> labelIDList = new ArrayList<>();
-        List<Float> confidenceList = new ArrayList<>();
-
+    private void findObjects(List<Mat> outputBlobs, Mat img) {
         for (Mat outputBlob : outputBlobs) {
             for (int row = 0; row < outputBlob.height(); row++) {
                 // find confidence in a row
@@ -170,7 +174,8 @@ public class ObjectClassifier extends JFrame {
 
         Mat src = Imgcodecs.imread("resources/pictures/kids.jpg");
         Mat res = new Mat();
-        detect(src, res);
+        ObjectClassifier objectClassifier = new ObjectClassifier();
+        objectClassifier.detect(src, res);
         src.release();
 
         // Show on window.

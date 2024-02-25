@@ -14,7 +14,8 @@ public class Webcam {
         Mat camImg = new Mat();
         Mat displayImg = new Mat();
         videoCapture.read(camImg);
-        ObjectClassifier.detect(camImg, displayImg);
+        ObjectClassifier objectClassifier = new ObjectClassifier();
+        objectClassifier.detect(camImg, displayImg);
 
         // The display window.
         ImageMatDisplay display = new ImageMatDisplay(displayImg, "Webcam");
@@ -26,7 +27,7 @@ public class Webcam {
         while (display.isDisplayable()) {
             // Update camImg and detect objects.
             videoCapture.read(camImg);
-            ObjectClassifier.detect(camImg, displayImg);
+            objectClassifier.detect(camImg, displayImg);
             display.refresh();
 
 
