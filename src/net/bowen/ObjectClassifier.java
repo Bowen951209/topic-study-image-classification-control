@@ -32,10 +32,8 @@ public class ObjectClassifier extends JFrame {
         net.setInput(blob);
         blob.release();
 
-        List<String> unconnectedOutLayersNames = net.getUnconnectedOutLayersNames();
-
         List<Mat> outputBlobs = new ArrayList<>();
-        net.forward(outputBlobs, unconnectedOutLayersNames);
+        net.forward(outputBlobs, net.getUnconnectedOutLayersNames());
 
         findObjects(outputBlobs, target);
 
