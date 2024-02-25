@@ -103,6 +103,8 @@ public class ObjectClassifier extends JFrame {
                     new Point(rect.x, rect.y), Imgproc.FONT_HERSHEY_SIMPLEX, .5, new Scalar(0,
                             255, 0), 1);
         }
+
+        resultIndicesMat.release();
     }
 
     /**
