@@ -48,6 +48,7 @@ public class ObjectClassifier extends JFrame {
         for (Mat outputBlob : outputBlobs) {
             outputBlob.release();
         }
+        outputBlobs.clear();
     }
 
 
@@ -108,6 +109,9 @@ public class ObjectClassifier extends JFrame {
                             255, 0), 1);
         }
 
+        rectList.clear();
+        labelIDList.clear();
+        confidenceList.clear();
         resultIndicesMat.release();
     }
 
