@@ -24,7 +24,7 @@ echo.
 
 echo Compiling...
 javac ^
-    -cp %LIBS_DIR%\*.jar ^
+    -cp %LIBS_DIR%\opencv-480.jar;%LIBS_DIR%\jSerialComm-2.10.4.jar ^
 	-d "%BIN_DIR%" ^
 	-sourcepath %SRC_DIR% ^
 	"%SRC_DIR%\%APP_STARTER_DIR%\%APP_STARTER%.java" ^
