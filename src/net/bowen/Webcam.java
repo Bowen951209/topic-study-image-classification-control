@@ -5,7 +5,19 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Webcam {
+    private static final List<Integer> AVAIL_OBJ = Arrays.asList(76, 39, 38); // scissors, bottle ,tennis rocket
+    private static final Timer TIMER = new Timer();
+
+    private static boolean isMovingServo;
+    private static final int DELAY_TIME = 0;
+    private static final int HOLD_TIME = 1500;
+
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
@@ -30,15 +42,22 @@ public class Webcam {
             objectClassifier.detect(camImg, displayImg);
             display.refresh();
 
+            if (commPort == null) continue;
 
-            // Read data from the port and print it as a string.
-            if (commPort != null) {
-                if (commPort.bytesAvailable() > 0) {
-                    byte[] readBuffer = new byte[commPort.bytesAvailable()];
-                    commPort.readBytes(readBuffer, readBuffer.length);
+            // If containing available objects, control the servos.
+            var itemList = objectClassifier.getLabelIDList();
+            itemList.retainAll(AVAIL_OBJ);
+            if (itemList.isEmpty()) continue;
 
-                    System.out.println(new String(readBuffer));
-                }
+            // NOTE: I only detect for the 1st item, since the picture should only have single item at a time.
+            Integer item = itemList.get(0);
+
+            if (item.equals(AVAIL_OBJ.get(0))) {
+                moveServo(commPort, 0);
+            } else if (item.equals(AVAIL_OBJ.get(1))) {
+                moveServo(commPort, 1);
+            } else {// it's the 3rd available object.
+                moveServo(commPort, 2);
             }
         }
 
@@ -47,6 +66,40 @@ public class Webcam {
         displayImg.release();
         if (commPort != null)
             commPort.closePort();
+    }
+
+    private static void moveServo(SerialPort port, int servoID) {
+        if (isMovingServo) {
+            System.out.println("busy");
+            return;
+        }
+        TimerTask moveServo = new TimerTask() {
+            @Override
+            public void run() {
+                isMovingServo = true;
+
+                portWriteString(port, "SER" + servoID + " " + 45);
+                System.out.println("Moved servo" + servoID);
+            }
+        };
+
+        TimerTask restoreServo = new TimerTask() {
+            @Override
+            public void run() {
+                portWriteString(port, "SER" + servoID + " 0");
+                System.out.println("Restored servo" + servoID);
+
+                isMovingServo = false;
+            }
+        };
+
+        TIMER.schedule(moveServo, DELAY_TIME);
+        TIMER.schedule(restoreServo, HOLD_TIME);
+    }
+
+    private static void portWriteString(SerialPort port, String string) {
+        byte[] buffer = string.getBytes();
+        port.writeBytes(buffer, buffer.length);
     }
 
     private static void printAvailablePorts() {
@@ -68,7 +121,7 @@ public class Webcam {
 
         // Get the port that is connected to Arduino UNO.
         for (SerialPort port : availablePorts) {
-            if (port.getPortDescription().contains("Arduino Uno")) {
+            if (port.getPortDescription().contains("Arduino Uno") || port.getPortDescription().contains("USB Serial")) {
                 unoPort = port;
                 break;
             }

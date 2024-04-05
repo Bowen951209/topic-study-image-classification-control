@@ -27,6 +27,10 @@ public class ObjectClassifier extends JFrame {
     private final List<Integer> labelIDList = new ArrayList<>();
     private final List<Float> confidenceList = new ArrayList<>();
 
+    public List<Integer> getLabelIDList() {
+        return labelIDList;
+    }
+
     public ObjectClassifier() {
         if (net == null) net = getNet();
     }
@@ -57,6 +61,10 @@ public class ObjectClassifier extends JFrame {
      * <a href="https://github.com/Bowen951209/topic-study-image-classification-control/blob/48d7def412acc89bb5d174428328e3a9c2e783be/resources/figures/figure0.png">figure</a>
      */
     private void findObjects(List<Mat> outputBlobs, Mat img) {
+        rectList.clear();
+        labelIDList.clear();
+        confidenceList.clear();
+
         for (Mat outputBlob : outputBlobs) {
             for (int row = 0; row < outputBlob.height(); row++) {
                 // find confidence in a row
@@ -109,9 +117,6 @@ public class ObjectClassifier extends JFrame {
                             255, 0), 1);
         }
 
-        rectList.clear();
-        labelIDList.clear();
-        confidenceList.clear();
         resultIndicesMat.release();
     }
 
