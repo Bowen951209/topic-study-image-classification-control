@@ -2,7 +2,7 @@
 
 REM === Inputs ===
 set PROJ_ROOT=.\
-set APP_STARTER=ObjectClassifier
+set APP_STARTER=Webcam
 set APP_STARTER_PACKAGE=net.bowen
 REM ===
 
